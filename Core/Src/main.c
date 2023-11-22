@@ -3,12 +3,12 @@
 
 ADC_HandleTypeDef hadc1;
 
-const int green_led = GPIO_PIN_5;
-const int red_led = GPIO_PIN_6;
-
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
+
+const int green_led = GPIO_PIN_5;
+const int red_led = GPIO_PIN_6;
 
 int main(void)
 {
@@ -19,19 +19,29 @@ int main(void)
 
   while (1)
   {
-    // Read analog value from A0
+    // Read analog values
     HAL_ADC_Start(&hadc1);
     HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
     int a = HAL_ADC_GetValue(&hadc1);
     HAL_ADC_Stop(&hadc1);
 
-    // Perform your logic based on analog value
+    HAL_ADC_Start(&hadc1);
+    HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+    int b = HAL_ADC_GetValue(&hadc1);
+    HAL_ADC_Stop(&hadc1);
+
+    // Print value of b
+    char uartTxBuffer[50];
+    sprintf(uartTxBuffer, "Analog Value B: %d\r\n", b);
+    HAL_UART_Transmit(&huart2, (uint8_t *)uartTxBuffer, strlen(uartTxBuffer), HAL_MAX_DELAY);
+
+    // Perform your logic based on analog values
     if (a > 4000)
     {
       HAL_GPIO_WritePin(GPIOA, green_led, GPIO_PIN_RESET);
       HAL_GPIO_WritePin(GPIOA, red_led, GPIO_PIN_RESET);
     }
-    else if (a > 1995)
+    else if (a > 1995 && b > 2000)
     {
       HAL_GPIO_WritePin(GPIOA, green_led, GPIO_PIN_SET);
       HAL_GPIO_WritePin(GPIOA, red_led, GPIO_PIN_RESET);
